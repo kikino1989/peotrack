@@ -1,0 +1,45 @@
+<button class="btn btn-link" (click)="goBack()">
+  <i class="fa fa-reply" aria-hidden="true"></i>
+  back
+</button>
+<br />
+
+<label>
+  <a routerLink="/client-details/{{client.id}}">{{ client.name }}</a>
+</label>
+
+<form class="order-items">
+  <legend>
+    <small> Order Details </small>
+  </legend>
+  <fieldset>
+    <div class="form-group">
+      <input type="text" class="form-control form-control-sm" id="name" aria-describedby="nameHelp" placeholder="Enter Product name"
+        [(ngModel)]="defaultItem.name" name="name" required>
+    </div>
+    <div class="form-group">
+      <input type="number" class="form-control form-control-sm" id="sellPrice" aria-describedby="sellPriceHelp" placeholder="Enter sell price"
+        [(ngModel)]="defaultItem.sellPrice" name="sellPrice" required>
+    </div>
+    <div class="form-group">
+      <input type="number" class="form-control form-control-sm" id="buyPrice" aria-describedby="buyPriceHelp" placeholder="Enter buying price (optional)"
+        [(ngModel)]="defaultItem.buyPrice" name="buyPrice">
+    </div>
+  </fieldset>
+  <button type="submit" class="btn btn-primary" (click)="add()">
+    <i class="fa fa-plus" aria-hidden="true"></i>
+    Add
+  </button>
+</form>
+
+<form class="save-order">
+
+  <list-box listType="item" [entities]="order.itemList" [(sort)]="sort" [deleteHandler]="delete"
+    [dMethod]="displayMethod" [sMethod]="searchMethod" (sortChange)="updateList()" >
+  </list-box>
+  
+  <button type="submit" class="btn btn-primary" (click)="save()">
+    <i class="fa fa-save" aria-hidden="true"></i>
+    Save
+  </button>
+</form>

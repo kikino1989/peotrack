@@ -1,0 +1,31 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "io.cordova.myapp52f126"
+        },
+        "cordova-plugin-contacts": {
+            "PACKAGE_NAME": "io.cordova.myapp52f126"
+        },
+        "cordova-sqlite-storage": {
+            "PACKAGE_NAME": "io.cordova.myapp52f126"
+        },
+        "cordova-plugin-device": {
+            "PACKAGE_NAME": "io.cordova.myapp52f126"
+        },
+        "cordova-plugin-file": {
+            "PACKAGE_NAME": "io.cordova.myapp52f126"
+        }
+    },
+    "dependent_plugins": {
+        "cordova-plugin-compat": {
+            "PACKAGE_NAME": "io.cordova.myapp52f126"
+        }
+    }
+}

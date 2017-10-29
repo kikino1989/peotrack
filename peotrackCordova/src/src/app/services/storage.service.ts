@@ -14,7 +14,7 @@ export class StorageService {
   openDB(_name: string, _location: string = 'default') {
 
     // wait for device to load
-    window.addEventListener('deviceready', function () {
+    window.addEventListener('deviceready',  () => {
 
       // try to open database
       (window as any).sqlitePlugin.openDatabase(
@@ -35,9 +35,9 @@ export class StorageService {
    */
   closeDB(){
     this.db.close(
-      function () {
+       () => {
         console.log("DB closed!");
-      }, function (err) {
+      },  (err) => {
           console.log(err.message);
       }
     );
@@ -79,40 +79,41 @@ export class DBContext {
   /**
    * @desc returns an object or an array of objects
    * @param id 
-   * @param cols 
+   * @param withColumns 
    * @param operator 
    * @param values 
    */
   read(
       id?: number,
-      cols: string | string[] = "*",
+      withColumns: string | string[] = "*",
       operator: string = "=",
       values: string | number | boolean | (string | number | boolean)[] = ""
   ): any | any[] | boolean {
+
+    let result: any | any[] | undefined; // results to be returned
 
     // set up transaction
     this.DB.transaction((tx) => {
 
       let query = ``; // query string holder
       let where = (id)? ` WHERE id ${operator} ${id}`: ``; // where string query
-      let result: any | any[] | undefined;
 
-      // check if cols is a string
-      if (typeof cols == "string") {
-
-        // assamble query string
-        query = `SELECT ${cols} FROM ${this.tableName}` + where ;
-
-      // check if cols is a string
-      } else if (typeof cols == typeof Array)  {
+      // check if withColumns is a string
+      if (typeof withColumns == "string") {
 
         // assamble query string
-        query = `SELECT ${(cols as Array<string>).keys().toLocaleString()} FROM ${this.tableName}` + where;
+        query = `SELECT ${withColumns} FROM ${this.tableName}` + where ;
+
+      // check if withColumns is a string
+      } else if (typeof withColumns == typeof Array)  {
+
+        // assamble query string
+        query = `SELECT ${(withColumns as Array<string>).keys().toLocaleString()} FROM ${this.tableName}` + where;
       }else throw "unsupported type";
 
       // execute query
       tx.executeSql(query, (typeof values == "string")? [values]: values,
-       function (tx, resultSet) {
+        (tx, resultSet) => {
 
           // check if we should return an array
           if(resultSet.rows.length > 1){
@@ -122,123 +123,226 @@ export class DBContext {
             for(let i = 0; i < resultSet.rows.length; i++){
               
               // save values to type properties
-              result.push(new this.type(resultSet.rows.item(i)));
+              result.push(new this.type(resultSet.rows.item(i)) );
             }
           // check if we should return a single instance
           }else if(resultSet.rows.length == 1){
 
             // create a new instance of the type
             result = new this.type(resultSet.rows.item(0));
-          // check if there are not results
-          }else {
-            result = false;
           }
           
           console.log("read successful");
         },
-        function (tx, error) {
+         (tx, error) => {
           console.log(error.message);
         });
-    }, function (error) {
+    },  (error) => {
       console.log( error.message);
-    }, function () {
+    },  () => {
       console.log('transaction ok');
     });
+
+    return result;
   }
 
   /**
-   * @desc returns the initialized instance of the type
+   * @desc inserts new row in the table
    * @param entity 
    */
   create(entity: any): number{
 
     let rowsAffected;
+
     // sets up transaction
-    this.DB.transaction(function (tx) {
+    this.DB.transaction( (tx) => {
       
-      let values: string = this.getValuesCount(); // values in the form of (?,?,?) for the size of keys.length
+      let values: string = this.getValues(); // values in the form of (?,?,?) for the size of keys.length
       let query = `INSERT INTO ${this.tableName} (${this.columns.keys().toLocaleString()}) VALUES ${values}`; // query string holder
 
       // run query
-      tx.executeSql(query, entity.values(), function (tx, res) {
+      tx.executeSql(query, entity.values(),  (tx, res) => {
 
         // get the affected rows
         rowsAffected = res.rowsAffected; 
 
         console.log("rowsAffected: " + res.rowsAffected + " -- should be 1");
       },
-        function (tx, error) {
+         (tx, error) => {
           console.log(error.message);
         });
-    }, function (error) {
+    },  (error) => {
       console.log(error.message);
-    }, function () {
+    },  () => {
       console.log('transaction ok');
     });
 
     return rowsAffected;
   }
 
-  update($cols: string | (string | number | boolean)[] = "*", operator: string = "=") {
+  /**
+   * @desc delete the row of the table
+   * @param entity
+   * @param withColumns 
+   * @param operator 
+   * @param glue 
+   */
+  update(
+    entity: any, 
+    withColumns: string | string[] = "id",
+    operator: string = "=",
+    glue: string = " AND "
+  ): number {
 
-    // UPDATE Cars SET Name='Skoda Octavia' WHERE Id=3;
-    db.transaction(function (tx) {
+    let rowsAffected;
 
-      var query = "UPDATE customerAccounts SET firstname = ? WHERE acctNo = ?";
+    // sets up transaction
+    this.DB.transaction( (tx) => {
 
-      tx.executeSql(query, [first, id], function (tx, res) {
-        console.log("insertId: " + res.insertId);
+      // query string holder
+      let query = 
+        `UPDATE ${this.tableName} SET (${this.getValues(entity)})` + 
+        this.getWhere(withColumns, operator, glue); 
+
+      tx.executeSql(query, entity.values(),  (tx, res) => {
+        
+        rowsAffected = res.rowsAffected;
         console.log("rowsAffected: " + res.rowsAffected);
       },
-        function (tx, error) {
-          console.log('UPDATE error: ' + error.message);
+         (tx, error) => {
+          console.log(error.message);
         });
-    }, function (error) {
-      console.log('transaction error: ' + error.message);
-    }, function () {
+    },  (error) => {
+      console.log(error.message);
+    },  () => {
+      console.log('transaction ok');
+    });
+
+    return rowsAffected;
+  }
+
+  /**
+   * @desc delete the row of the table
+   * @param entity
+   * @param withColumns 
+   * @param operator 
+   * @param glue 
+   */
+  delete(
+    entity: any, 
+    withColumns: string | string[] = "id",
+    operator: string = "=",
+    glue: string = " AND "
+  ): number {
+
+    let rowsAffected;
+    
+    this.DB.transaction( (tx) => {
+
+      // query string holder
+      let query = 
+        `UPDATE ${this.tableName} SET (${this.getValues(entity)})` + 
+        this.getWhere(withColumns, operator, glue); 
+
+      tx.executeSql(query, entity.values(),  (tx, res) => {
+        
+        rowsAffected = res.rowsAffected;
+        console.log("rowsAffected: " + res.rowsAffected);
+      },
+         (tx, error) => {
+          console.log(error.message);
+        });
+    },  (error) => {
+      console.log(error.message);
+    },  () => {
+      console.log('transaction ok');
+    });
+
+    return rowsAffected;
+  }
+
+  /**
+   * @desc returns whether an row with the id of the entity exist
+   * @param entity
+   */
+  exist(entity): boolean{
+
+    let has: boolean;
+    this.DB.executeSql(`SELECT * FROM ${this.tableName} WHERE ID = ${entity.id}`, [], (rs) {
+
+      has = rs.rows.length > 0;
+    }, (error) => {
+      console.log('SELECT SQL statement ERROR: ' + error.message);
+    });
+
+    return has;
+  }
+
+  
+  query(query: string, values: any[] = [], scs: (tx, res) => void, err?: (tx, res) => void) {
+
+    // sets up transaction
+    this.DB.transaction((tx) => {
+
+      // run query
+      tx.executeSql(query, values, scs, err);
+    }, (error) => {
+      console.log(error.message);
+    }, () => {
       console.log('transaction ok');
     });
   }
+  /**
+   * @desc return a where clause 
+   * @param withColumns 
+   * @param operator 
+   * @param glue 
+   */
+  private getWhere(withColumns: string | string[], operator: string, glue: string): string{
 
-  delete($cols: string | (string | number | boolean)[] = "*", operator: string = "="){
+    let where: string = ""; // where clause holder
 
-    db.transaction(function (tx) {
+    // check if withColumns is string
+    if (typeof withColumns == "string") {
 
-      var query = "DELETE FROM customerAccounts WHERE acctNo = ?";
+      // set where clause
+      where = ` WHERE ${withColumns} ${operator} ?`;
+      // check if withColumns is array
+    } else if (typeof withColumns == typeof Array) {
 
-      tx.executeSql(query, [acctNum], function (tx, res) {
-        console.log("removeId: " + res.insertId);
-        console.log("rowsAffected: " + res.rowsAffected);
-      },
-        function (tx, error) {
-          console.log('DELETE error: ' + error.message);
-        });
-    }, function (error) {
-      console.log('transaction error: ' + error.message);
-    }, function () {
-      console.log('transaction ok');
-    });
-  }
+      // set where clause
+      where = ` WHERE`;
+      // iterate thru each column
+      for (let i = 0; i < withColumns.length; i++) {
 
-  exist($cols: string | (string | number | boolean)[] = "*", operator: string = "="){
+        // append withColumns to where clause
+        where += (` ${withColumns[i]} ${operator} ?` + (i < withColumns.length - 1) ? glue : '');
+      }
+    } else throw "unsupported type";
 
-  }
-
-  query() {
-
+    return where;
   }
 
   /**
    * @desc returns (?,?,?) for the size of keys.length
    */
-  getValuesCount(): string{
+  private getValues(entity?: any): string{
 
-    let value: string = "(";
+    let value: string = entity? "": "(";
     for(let i = 0; i < this.columns.length; i++){
 
-      value += (i == this.columns.length - 1)? "?": "?,";
+      // check if the entity exist
+      if(entity){
+
+        // set up string for update query
+        value += (i == this.columns.length - 1)? `${this.columns[i]} = ?`: `${this.columns[i]} = ?,`;
+      }else{
+
+        // set up string for insert query
+        value += (i == this.columns.length - 1)? "?": "?,";
+      }
     }
-    value += ")";
+    value += entity? "": ")";
     return value;
   }
 }

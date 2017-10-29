@@ -1,0 +1,12 @@
+<button class="btn btn-link" (click)="goBack()">
+  <i class="fa fa-reply" aria-hidden="true"></i>
+  back
+</button>
+<br />
+
+<list-box path="/order-details" back="pending-orders" listType="order" [entities]="orders" 
+  [(sort)]="sort" [statusHandler]="saveStatus" [dMethod]="displayMethod" [sMethod]="searchMethod" 
+  (sortChange)="updateList()" [height]="listHeight">
+</list-box>
+
+<pagination></pagination>

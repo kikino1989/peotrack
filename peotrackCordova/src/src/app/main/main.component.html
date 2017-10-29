@@ -1,0 +1,42 @@
+<button class="btn btn-link" (click)="toggleForm()">
+    <i class="fa fa-{{ showform? 'eye-slash': 'plus' }}" aria-hidden="true"></i>
+    {{ (showform)? 'Hide': 'Add Client' }}
+  </button>
+
+<form *ngIf="showform" class="client-information">
+  <legend>
+    <small> Client Information </small>
+  </legend>
+  <fieldset>
+  <div class="form-group">
+    <input type="text" class="form-control form-control-sm" id="fullname" 
+      aria-describedby="fullnameHelp" placeholder="Client fullname" 
+      [(ngModel)]="newClient.fullname" name="fullname" required>
+  </div>
+  <div class="form-group">
+    <input type="tel" class="form-control form-control-sm" id="phone" 
+      aria-describedby="phoneHelp" placeholder="Enter phone number" 
+      [(ngModel)]="newClient.phone" name="phone" required>
+  </div>
+  <div class="form-group">
+    <input type="email" class="form-control form-control-sm" id="email" 
+      aria-describedby="emailHelp" placeholder="Enter email address (optional)"
+      [(ngModel)]="newClient.email" name="email">
+  </div>
+  <div class="form-group">
+    <input type="text" class="form-control form-control-sm" id="address" 
+    aria-describedby="addressHelp" placeholder="Enter home address (optional)"
+    [(ngModel)]="newClient.address" name="address">
+  </div>
+</fieldset>
+  <button type="submit" class="btn btn-primary" (click)="addClient()">
+    <i class="fa fa-plus" aria-hidden="true"></i> 
+    Add
+  </button>
+</form> 
+
+<list-box path="/client-details" listType="client" [entities]="clients" [(sort)]="sort" 
+  [height]="listHeight" [dMethod]="displayMethod" [sMethod]="searchMethod" (sortChange)="updateList()" >
+</list-box>
+
+<pagination></pagination>

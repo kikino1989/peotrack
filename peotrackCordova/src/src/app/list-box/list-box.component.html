@@ -1,0 +1,41 @@
+<div class="list-controls row" >
+    <input [(ngModel)]="search" type="text" class="form-control form-control-sm col-8" 
+      id="clientName" placeholder="Enter text" />
+    <button (click)="toggleSort()" class="col-4 btn btn-link">
+        Sort
+        <i class="fa fa-sort-{{ sort? 'desc': 'asc' }}" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="list-container" id="list-container" [style.height]="height">
+    <ol>
+      <ng-container *ngFor="let entity of entities">
+          <li *ngIf="search =='' || (search != '' && searchMethod(entity, search))">
+
+            <!-- if the list is of clients -->
+            <a *ngIf="listType && listType == 'client'" routerLink="{{path}}/{{entity.id}}" >
+              {{ displayMethod(entity) }}
+            </a>
+            
+            <!-- if the list is of orders -->
+            <a *ngIf="listType && listType=='order'" routerLink="{{path}}/{{entity.id}}/{{back}}" >
+              {{ displayMethod(entity) }}
+            </a>
+            <select *ngIf="listType && listType=='order'" (change)="statusHandler(entity)"
+              [disabled]="entity.status == 'Finished'" [(ngModel)]="entity.status">
+              <option ngValue="Pending">Pending</option>
+              <option ngValue="Paid">Paid</option>
+              <option ngValue="Cancelled">Cancelled</option>
+              <option ngValue="Finished">Finished</option>
+            </select>
+
+            <!-- if the list is of items -->
+            {{ (listType && listType == 'item')? displayMethod(entity): '' }}
+            <button *ngIf="listType && listType=='item'" class="btn btn-link" (click)="deleteHandler(entity, entities)">
+              <i class="fa fa-minus" aria-hidden="true"></i>
+              Remove
+            </button>
+        </li>
+      </ng-container>
+    </ol>
+  </div>

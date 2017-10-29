@@ -1,0 +1,51 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+# .gitignore
+[Pp]lugins/android.json
+[Pp]lugins/windows.json
+[Pp]lugins/wp8.json
+[Pp]lugins/remote_ios.json
+/[Pp]latforms/
+
+# compiled output
+/peotrackCordova/bin
+/peotrackCordova/www
+/peotrackCordova/src/tmp
+/peotrackCordova/src/out-tsc
+
+# dependencies
+/peotrackCordova/src/node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vs
+.vs/*
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/peotrackCordova/src/.sass-cache
+/peotrackCordova/src/connect.lock
+/peotrackCordova/src/coverage
+/peotrackCordova/src/libpeerconnection.log
+/peotrackCordova/src/npm-debug.log
+/peotrackCordova/src/testem.log
+/peotrackCordova/src/typings
+
+# e2e
+/peotrackCordova/src/e2e/*.js
+/peotrackCordova/src/e2e/*.map
+
+# System Files
+.DS_Store
+Thumbs.db

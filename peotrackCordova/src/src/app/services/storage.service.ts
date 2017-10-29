@@ -6,7 +6,6 @@ export class StorageService {
   // database holder
   private db: any;
   private type: any;
-
   /**
    * @desc opens database connection
    * @param _name
@@ -45,8 +44,7 @@ export class StorageService {
   }
 
   /**
-   * @desc returns an instance of DBContext, 
-   * openDB must have been called first
+   * @desc returns an instance of DBContext, openDB must have been called first
    * @param type: Object.constructor
    */
   getDBContext(type: Function): DBContext{
@@ -182,6 +180,7 @@ export class DBContext {
   }
 
   update($cols: string | (string | number | boolean)[] = "*", operator: string = "=") {
+
     // UPDATE Cars SET Name='Skoda Octavia' WHERE Id=3;
     db.transaction(function (tx) {
 
@@ -202,6 +201,7 @@ export class DBContext {
   }
 
   delete($cols: string | (string | number | boolean)[] = "*", operator: string = "="){
+
     db.transaction(function (tx) {
 
       var query = "DELETE FROM customerAccounts WHERE acctNo = ?";

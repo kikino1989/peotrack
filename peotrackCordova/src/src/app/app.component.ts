@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { StorageService } from './services/storage.service';
 import Order from './models/order';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -14,6 +15,5 @@ export class AppComponent{
 
     storage.openDB("peotrack");
   }
-
-
 }
+

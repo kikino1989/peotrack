@@ -63,9 +63,8 @@ export class DBContext {
       // add field to columns
       this.columns[key] = (entity as Object)[key];
     }
-
   }
-
+  
   read($params: string | (string | number | boolean)[] = "*", operator: string = "=") {
 
   }

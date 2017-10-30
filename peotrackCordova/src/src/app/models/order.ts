@@ -1,45 +1,40 @@
 import Item from './item';
+import { StorageService } from "../services/storage.service";
 
 export enum StatusEnum {
-    pending, paid, finished, cancelled
+    pending = "Pending", paid = "Paid", finished = "Finished", cancelled = "Cancelled"
 }
 
 export default class Order {
 
-    static count: number = 0;
+    public id: number;
+    public clientId: number; 
+    public created_at: string;
+    public itemList: Item[];
+    private status: StatusEnum;
     
-    constructor(
-        public clientId: number, 
-        public created_at: string,
-        public itemList: Item[],
-        private _status: StatusEnum = StatusEnum.pending,
-        public id: number = Order.count
-    ){
-        Order.count++;
+    constructor({
+        clientId: clientId, 
+        created_at: created_at,
+        status: status,
+        id: id
+    }, private storage: StorageService){
+        this.id = id;
+        this.clientId = clientId;
+        this.created_at = created_at;
+        this.status = status;
+
+        let where = []; where["orderId"] = this.id;
+        this.itemList = <Array<Item>>this.storage
+          .getDBContext(Item.prototype.constructor)
+          .readWhere(undefined, undefined, undefined, where);
     }
 
-    get status(): string{
-
-        switch(this._status){
-            case StatusEnum.pending: return "Pending";
-            case StatusEnum.paid: return "Paid";
-            case StatusEnum.finished: return "Finished";
-            case StatusEnum.cancelled: return "Cancelled";
-        }
-
-        return "Pending";
-    }
-
-    set status(value: string){
-
-        switch (value) {
-            case "Pending": this._status = StatusEnum.pending;
-            case "Paid": this._status = StatusEnum.paid;
-            case "finished": this._status = StatusEnum.finished;
-            case "cancelled": this._status = StatusEnum.cancelled;
-        }
-    }
-
+    /**
+     * @desc determines if an order has an item
+     * @param itemName 
+     * @return boolean
+     */
     has(itemName: string): boolean{
     
         let _has = false;
@@ -53,6 +48,9 @@ export default class Order {
         return _has;
     }
 
+    /**
+     * @desc returns the order total cost
+     */
     getTotal(): number{
         
         let count = 0;
@@ -64,6 +62,9 @@ export default class Order {
         return count;
     }
 
+    /**
+     * @desc returns how many items in an order
+     */
     getItemCount(): number{
 
         return this.itemList.length;

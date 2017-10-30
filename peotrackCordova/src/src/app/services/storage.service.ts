@@ -56,7 +56,6 @@ export class StorageService {
 
 }
 
-
 export class DBContext {
   
   private tableName: string;
@@ -88,9 +87,9 @@ export class DBContext {
       withColumns: string | string[] = "*",
       operator: string = "=",
       values: string | number | boolean | (string | number | boolean)[] = ""
-  ): any | any[] | boolean {
+  ): any[]{
 
-    let result: any | any[] | undefined; // results to be returned
+    let results: any[] = []; // results to be returned
 
     // set up transaction
     this.DB.transaction((tx) => {
@@ -115,21 +114,11 @@ export class DBContext {
       tx.executeSql(query, (typeof values == "string")? [values]: values,
         (tx, resultSet) => {
 
-          // check if we should return an array
-          if(resultSet.rows.length > 1){
-
-            result = [];
-            // iterate thru all result sets
-            for(let i = 0; i < resultSet.rows.length; i++){
+          // iterate thru all result sets
+          for(let i = 0; i < resultSet.rows.length; i++){
               
-              // save values to type properties
-              result.push(new this.type(resultSet.rows.item(i)) );
-            }
-          // check if we should return a single instance
-          }else if(resultSet.rows.length == 1){
-
-            // create a new instance of the type
-            result = new this.type(resultSet.rows.item(0));
+            // add instance to results
+            results.push(new (this.type as any)(resultSet.rows.item(i)));
           }
           
           console.log("read successful");
@@ -143,9 +132,66 @@ export class DBContext {
       console.log('transaction ok');
     });
 
-    return result;
+    return results;
   }
 
+  readWhere(
+    withColumns: string | string[] = "*",
+    operator: string = "=",
+    glue: string = " AND ",
+    where: any[]
+  ): any[] {
+
+    let results: any[] = []; // results to be returned
+
+    // set up transaction
+    this.DB.transaction((tx) => {
+
+      let query = ``; // query string holder
+      let _where = ` WHERE `;
+      for(let i = 0; i < where.length; i++){
+
+        // append withColumns to where clause
+        _where += (` ${where.keys()[i]} ${operator} ?` + (i < where.length - 1) ? glue : '');
+      }
+      // check if withColumns is a string
+      if (typeof withColumns == "string") {
+
+        // assamble query string
+        query = `SELECT ${withColumns} FROM ${this.tableName}` + _where;
+
+        // check if withColumns is a string
+      } else if (typeof withColumns == typeof Array) {
+
+        // assamble query string
+        query = `SELECT ${(withColumns as Array<string>).keys().toLocaleString()} FROM ${this.tableName}` + _where;
+      } else throw "unsupported type";
+
+      // execute query
+      tx.executeSql(query, where.values(),
+        (tx, resultSet) => {
+
+          // iterate thru all result sets
+          for (let i = 0; i < resultSet.rows.length; i++) {
+
+            // add instance to results
+            results.push(new (this.type as any)(resultSet.rows.item(i)));
+          }
+
+          console.log("read successful");
+        },
+        (tx, error) => {
+          console.log(error.message);
+        });
+    }, (error) => {
+      console.log(error.message);
+    }, () => {
+      console.log('transaction ok');
+    });
+
+    return results;
+  }
+  
   /**
    * @desc inserts new row in the table
    * @param entity 
@@ -268,17 +314,24 @@ export class DBContext {
   exist(entity): boolean{
 
     let has: boolean;
-    this.DB.executeSql(`SELECT * FROM ${this.tableName} WHERE ID = ${entity.id}`, [], (rs) {
-
-      has = rs.rows.length > 0;
-    }, (error) => {
-      console.log('SELECT SQL statement ERROR: ' + error.message);
-    });
+    this.DB.executeSql(`SELECT * FROM ${this.tableName} WHERE ID = ${entity.id}`, [], 
+      (rs) =>{
+        has = rs.rows.length > 0;
+      }, (error) => {
+        console.log('SELECT SQL statement ERROR: ' + error.message);
+      }
+    );
 
     return has;
   }
 
-  
+  /**
+   * @desc exequest a custom query 
+   * @param query 
+   * @param values 
+   * @param scs 
+   * @param err 
+   */
   query(query: string, values: any[] = [], scs: (tx, res) => void, err?: (tx, res) => void) {
 
     // sets up transaction
@@ -292,6 +345,7 @@ export class DBContext {
       console.log('transaction ok');
     });
   }
+
   /**
    * @desc return a where clause 
    * @param withColumns 

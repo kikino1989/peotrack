@@ -1,15 +1,23 @@
 
 export default class Client {
 
-    static count: number = 0;
+    public id: number;
+    public fullname: string;
+    public phone: string;
+    public email?: string;
+    public address?: string;
 
-    constructor( 
-        public fullname: string,
-        public phone: string,
-        public email?: string,
-        public address?: string,
-        public id:number = Client.count
-    ){
-        Client.count++;
+    constructor({
+        fullname: fullname,
+        phone: phone,
+        email: email,
+        address: address,
+        id: id
+    }){
+        this.fullname = fullname;
+        this.phone =  phone;
+        this.email = email;
+        this.address = address;
+        this.id = id;
     }
 }

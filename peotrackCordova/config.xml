@@ -20,6 +20,7 @@
   <allow-intent href="sms:*" />
   <allow-intent href="mailto:*" />
   <allow-intent href="geo:*" />
+  <hook type="before_build" script="ng_build.bat" />
   <platform name="android">
     <allow-intent href="market:*" />
   </platform>

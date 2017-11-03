@@ -27,8 +27,6 @@ export class OrderDetailsComponent implements OnInit {
 
   ngOnInit() {
 
-    this.defaultItem = new Item("your product", 0);
-
     if(this.route.snapshot.paramMap.get('orderId')){
       
       this.order = this.orderService.find(
@@ -43,12 +41,13 @@ export class OrderDetailsComponent implements OnInit {
       );
     }
 
+    this.defaultItem = new Item(this.order.id, "Your Product");
     this.client = this.clientService.find(this.order.clientId);  
   }
 
   add(){
     this.order.itemList.push(this.defaultItem);
-    this.defaultItem = new Item("your product", 0);
+    this.defaultItem = new Item(this.order.id, "Your Product");
   }
 
   delete(item, items){
@@ -71,7 +70,7 @@ export class OrderDetailsComponent implements OnInit {
 
   save(){
     // save order to the server
-    this.orderService.orders.push(this.order);
+    // to be implemented this.orderService.getOrders().push(this.order);
     this.goBack();
   }
 

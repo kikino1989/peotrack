@@ -33,7 +33,7 @@ export class OrderService {
   /**
    * @desc return all orders 
    */
-  getOrders(): Order[]{
+  getOrders(sort: boolean = false): Order[]{
 
     let orders: Order[] = [];
 
@@ -47,9 +47,26 @@ export class OrderService {
     // close database connection
     this.storage.closeDB();
 
-    return orders;
+    return (sort)? orders.sort((a: Order, b: Order) =>{
+      if(a.created_at > b.created_at)
+        return -1;
+      else if(a.created_at < b.created_at)
+        return 1;
+      else return 0;
+    }):
+    orders.sort((a: Order, b: Order) =>{
+      if(a.created_at < b.created_at)
+        return -1;
+      else if(a.created_at > b.created_at)
+        return 1;
+      else return 0;
+    });
   }
 
+  /**
+   * @desc returns orders with a status of pending
+   * @param sort 
+   */
   getPendingOrders(sort: boolean = false): Order[] {
 
     let orders: Order[] = [];
@@ -65,9 +82,27 @@ export class OrderService {
     // close database connection
     this.storage.closeDB();
 
-    return orders;
+    return (sort)? orders.sort((a: Order, b: Order) =>{
+      if(a.created_at > b.created_at)
+        return -1;
+      else if(a.created_at < b.created_at)
+        return 1;
+      else return 0;
+    }):
+    orders.sort((a: Order, b: Order) =>{
+      if(a.created_at < b.created_at)
+        return -1;
+      else if(a.created_at > b.created_at)
+        return 1;
+      else return 0;
+    });
   }
 
+  /**
+   * @desc returns orders for the given client
+   * @param clientId
+   * @param sort 
+   */
   getClientOrders(clientId: number, sort: boolean = false): Order[]{
     
     let orders: Order[] = [];
@@ -98,6 +133,5 @@ export class OrderService {
           return 1;
         else return 0;
       });
-
   }
 }

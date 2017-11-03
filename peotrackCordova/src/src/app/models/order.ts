@@ -1,24 +1,30 @@
 import Item from './item';
 import { StorageService } from "../services/storage.service";
 
-export enum StatusEnum {
-    pending = "Pending", paid = "Paid", finished = "Finished", cancelled = "Cancelled"
+export const StatusEnum  = {
+    pending : "Pending", paid : "Paid", finished : "Finished", cancelled : "Cancelled"
 }
 
 export default class Order {
 
-    public id: number;
-    public clientId: number; 
-    public created_at: string;
-    public itemList: Item[];
-    private status: StatusEnum;
-    
-    constructor({
+  public id: number;
+  private storage: StorageService;
+
+    constructor(
+      public clientId: number = -1,
+      public created_at: string = "",
+      public itemList?: Item[],
+      private status: string = StatusEnum.pending
+    ) {
+      this.storage = new StorageService();
+    }
+
+    init({
         clientId: clientId, 
         created_at: created_at,
         status: status,
         id: id
-    }, private storage: StorageService){
+    }){
         this.id = id;
         this.clientId = clientId;
         this.created_at = created_at;

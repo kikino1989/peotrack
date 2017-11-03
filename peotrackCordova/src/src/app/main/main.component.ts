@@ -27,7 +27,7 @@ export class MainComponent implements OnInit {
    */
   ngOnInit() {
     this.sort = false;
-    this.newClient = new Client( "", "");
+    this.newClient = new Client("", "");
     this.showform = true;
     this.clients = this.clientService.getClients(this.sort);
   }

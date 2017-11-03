@@ -2,12 +2,17 @@
 export default class Client {
 
     public id: number;
-    public fullname: string;
-    public phone: string;
-    public email?: string;
-    public address?: string;
 
-    constructor({
+    constructor(
+      public fullname: string = "",
+      public phone: string = "",
+      public email?: string,
+      public address?: string
+    ) {
+
+    }
+
+    init({
         fullname: fullname,
         phone: phone,
         email: email,

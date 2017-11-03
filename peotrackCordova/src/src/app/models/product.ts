@@ -2,9 +2,12 @@
 export default class Product {
 
     public id: number;
-    public name: string;
 
-    constructor({
+    constructor(
+      public name: string = ""
+    ) { }
+
+    init({
         name: name,
         id: id, 
     }){

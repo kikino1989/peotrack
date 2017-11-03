@@ -1,19 +1,24 @@
 
 export default class Item {
 
-    public id: number;
-    public orderId: number;
-    public name: string;
-    public sellPrice: number;
-    public buyPrice?: number;
+  public id: number;
 
-    constructor({
+    constructor(
+      public orderId: number = -1,
+      public name: string = "",
+      public sellPrice: number = 0,
+      public buyPrice?: number
+    ) {
+
+    }
+
+    init({
         name: name,
         sellPrice: sellPrice,
         buyPrice: buyPrice,
         id: id, 
         orderId: orderId
-    }){
+    }) {
         this.name = name;
         this.sellPrice = sellPrice;
         this.id = id;

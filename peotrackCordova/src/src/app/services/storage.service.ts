@@ -13,34 +13,43 @@ export class StorageService {
    */
   openDB(_name: string, _location: string = 'default') {
 
-    // wait for device to load
-    window.addEventListener('deviceready',  () => {
+    // try to open database
+    (window as any).sqlitePlugin.openDatabase(
+      { name: `${_name}.db`, location: _location },
+      (db: any) => {
 
-      // try to open database
-      (window as any).sqlitePlugin.openDatabase(
-        { name: `${_name}.db`, location: _location },
-        (db: any) => {
+        // init database
+        this.db = db;
+      }, (err: any) => {
 
-          // init database
-          this.db = db;
-        }, (err: any) => {
-
-          console.log(err.message);
-        });
-    }, false);
+        console.log(err.message);
+      });
   }
 
   /**
    * @desc close database connection
    */
-  closeDB(){
-    this.db.close(
-       () => {
-        console.log("DB closed!");
-      },  (err) => {
+  closeDB() {
+    if (this.db) {
+      this.db.close(
+        () => {
+          console.log("DB closed!");
+        }, (err) => {
           console.log(err.message);
-      }
-    );
+        }
+      );
+    } else throw "not database connection";
+  }
+
+  /**
+   * @desc execute given query
+   * @param query
+   * @param values
+   * @param scs
+   * @param err
+   */
+  query(query: string, values: any[] = [], scs: (tx, res) => void, err?: (tx, res) => void) {
+    DBContext.query(this.db, query, values, scs, err);
   }
 
   /**
@@ -66,7 +75,7 @@ export class DBContext {
    * @param DB 
    * @param type: Object.constructor
    */
-  constructor(private DB: any, private type: Function) {
+  constructor(private DB: any, private type) {
     
     // get table name
     this.tableName = this.type.name;
@@ -118,7 +127,7 @@ export class DBContext {
           for(let i = 0; i < resultSet.rows.length; i++){
               
             // add instance to results
-            results.push(new (this.type as any)(resultSet.rows.item(i)));
+            results.push(new (this.type as any)().init(resultSet.rows.item(i)));
           }
           
           console.log("read successful");
@@ -175,7 +184,7 @@ export class DBContext {
           for (let i = 0; i < resultSet.rows.length; i++) {
 
             // add instance to results
-            results.push(new (this.type as any)(resultSet.rows.item(i)));
+            results.push(new (this.type as any)().init(resultSet.rows.item(i)));
           }
 
           console.log("read successful");
@@ -332,10 +341,10 @@ export class DBContext {
    * @param scs 
    * @param err 
    */
-  query(query: string, values: any[] = [], scs: (tx, res) => void, err?: (tx, res) => void) {
+  static query(DB, query: string, values: any[] = [], scs?: (tx, res) => void, err?: (tx, res) => void) {
 
     // sets up transaction
-    this.DB.transaction((tx) => {
+    DB.transaction((tx) => {
 
       // run query
       tx.executeSql(query, values, scs, err);
